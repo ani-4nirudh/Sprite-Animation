@@ -9,14 +9,15 @@
 #include <SDL3/SDL_main.h>
 #include <SDL3_image/SDL_image.h>
 
-const int WINDOW_HEIGHT = 400;
-const int WINDOW_WIDTH = 400;
-const int FPS = 30;
-const int ANIMATION_FRAME_COUNT = 6;
-const int SPRITE_FRAME_WIDTH = 30;
-const int SPRITE_FRAME_HEIGHT = 25;
-const std::string SPRITE_SHEET_PATH = "../assets/dog_sprite.png";
-// const std::string SPRITE_SHEET_PATH = "../assets/7966219.jpg";
+// Values for trees animation
+const int ANIMATION_FRAMES = 6;
+const int SPRITE_FRAME_WIDTH = 420;
+const int SPRITE_FRAME_HEIGHT = 400;
+const int START_Y_PIXEL = 0;
+const int SECOND_ROW_Y = 480;
+const int WINDOW_HEIGHT = SPRITE_FRAME_HEIGHT;
+const int WINDOW_WIDTH = SPRITE_FRAME_WIDTH;
+const std::string SPRITE_SHEET_PATH = "../assets/trees.png";
 const std::string OUTPUT_FRAMES_DIR = "frames";
 
 static SDL_Window* window = NULL;
@@ -38,7 +39,7 @@ int main(int argc, char* argv[])
     } else
     {
         std::cout << "!! Creating window and renderer !!" << std::endl;
-        window = SDL_CreateWindow("Running Dog", WINDOW_HEIGHT, WINDOW_WIDTH, SDL_WINDOW_RESIZABLE); // SDL_WindowFlags is set to 0
+        window = SDL_CreateWindow("Trees", WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE); // SDL_WindowFlags is set to 0
         renderer = SDL_CreateRenderer(window, NULL); // SDL will choose the rendering driver on its own
     }
 
@@ -53,8 +54,8 @@ int main(int argc, char* argv[])
 
     int frame_count = 0;
     SDL_FRect source, destination;
-    source.x = 240;
-    source.y = 10;
+    source.x = 0; 
+    source.y = START_Y_PIXEL;
     source.w = SPRITE_FRAME_WIDTH;
     source.h = SPRITE_FRAME_HEIGHT;
     destination.x = (WINDOW_WIDTH - SPRITE_FRAME_WIDTH) / 2.0f;
@@ -77,11 +78,17 @@ int main(int argc, char* argv[])
 
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
 
-        source.x = (frame_count % 7) * 70;
-        SDL_RenderTexture(renderer, texture, &source, &destination);
-        SDL_RenderPresent(renderer);
-        SDL_Delay(100);
-        frame_count++;
+        for (int i = 0; i < 2; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                source.x = (j * SPRITE_FRAME_WIDTH);
+                source.y = i * START_Y_PIXEL;
+                SDL_RenderTexture(renderer, texture, &source, &destination);
+                SDL_RenderPresent(renderer);
+                SDL_Delay(500);
+            }
+        }
     }
 
     SDL_DestroyTexture(texture);
