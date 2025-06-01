@@ -1,3 +1,4 @@
 # Directories to ignore
 build/
 lib/
+frames/

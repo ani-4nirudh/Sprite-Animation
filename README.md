@@ -21,3 +21,6 @@ make -j${nproc}
 # Run the project
 ./trees
 ```
+
+## Result
+![Swaying Trees](assets/trees.gif)

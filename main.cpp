@@ -18,7 +18,7 @@ const int SECOND_ROW_Y = 480;
 const int WINDOW_HEIGHT = SPRITE_FRAME_HEIGHT;
 const int WINDOW_WIDTH = SPRITE_FRAME_WIDTH;
 const std::string SPRITE_SHEET_PATH = "../assets/trees.png";
-const std::string OUTPUT_FRAMES_DIR = "frames";
+const std::string OUTPUT_FRAMES_DIR = "../frames";
 
 static SDL_Window* window = NULL;
 static SDL_Renderer* renderer = NULL;
@@ -26,7 +26,6 @@ static SDL_Surface* surface = NULL;
 static SDL_Texture* texture = NULL;
 
 bool isRunning = true;
-
 
 int main(int argc, char* argv[])
 {
@@ -53,6 +52,7 @@ int main(int argc, char* argv[])
     SDL_DestroySurface(surface);
 
     int frame_count = 0;
+    int animation_cycles = 2;
     SDL_FRect source, destination;
     source.x = 0; 
     source.y = START_Y_PIXEL;
@@ -63,7 +63,12 @@ int main(int argc, char* argv[])
     destination.w = SPRITE_FRAME_WIDTH;
     destination.h = SPRITE_FRAME_HEIGHT;
 
-    while (isRunning)
+    if (!std::filesystem::exists(OUTPUT_FRAMES_DIR))
+    {
+        std::filesystem::create_directory(OUTPUT_FRAMES_DIR);
+    }
+
+    while (isRunning && (animation_cycles > 0))
     {
         SDL_Event event;
         while (SDL_PollEvent(&event))
@@ -75,19 +80,32 @@ int main(int argc, char* argv[])
         }
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(renderer);
-
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
 
-        for (int i = 0; i < 2; i++)
+        int row = frame_count / 3; // Cycles between 0, 1 and 2
+        int col = frame_count % 3; // Cycles between 0 and 1 
+        
+        source.x = col * SPRITE_FRAME_WIDTH;
+        source.y = row * START_Y_PIXEL;
+
+        SDL_RenderTexture(renderer, texture, &source, &destination);
+        SDL_RenderPresent(renderer);
+
+        SDL_Surface* screenshot = SDL_RenderReadPixels(renderer, NULL);
+        if (screenshot)
         {
-            for (int j = 0; j < 3; j++)
-            {
-                source.x = (j * SPRITE_FRAME_WIDTH);
-                source.y = i * START_Y_PIXEL;
-                SDL_RenderTexture(renderer, texture, &source, &destination);
-                SDL_RenderPresent(renderer);
-                SDL_Delay(500);
-            }
+            std::string filename = OUTPUT_FRAMES_DIR + "/frame_" + std::to_string(animation_cycles) + "_" + std::to_string(frame_count) + ".png";
+            IMG_SavePNG(screenshot, filename.c_str());
+            SDL_DestroySurface(screenshot);
+        }
+
+        SDL_Delay(500);
+        frame_count++;
+
+        if (frame_count >= ANIMATION_FRAMES)
+        {
+            frame_count = 0; // Reset
+            animation_cycles--;
         }
     }
 
